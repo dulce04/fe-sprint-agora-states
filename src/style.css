@@ -144,10 +144,6 @@ li.discussion__container {
   list-style-type: none;
 }
 
-/* li.discussion__container > div {
-
-} */
-
 div.discussion__avatar--wrapper {
   display: flex;
   justify-content: center;

@@ -19,7 +19,7 @@
   "bugs": {
     "url": "https://github.com/dulce04/fe-sprint-my-agora-states-reference/issues"
   },
-  "homepage": "https://github.com/dulce04/fe-sprint-my-agora-states-reference#readme",
+  "homepage": "https://github.com/dulce04/fe-sprint-my-agora-states-reference",
   "devDependencies": {
     "css-loader": "^6.7.1",
     "gh-pages": "^4.0.0",

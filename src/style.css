@@ -144,9 +144,9 @@ li.discussion__container {
   list-style-type: none;
 }
 
-li.discussion__container > div {
-  /* padding: 0.5rem; */
-}
+/* li.discussion__container > div {
+
+} */
 
 div.discussion__avatar--wrapper {
   display: flex;

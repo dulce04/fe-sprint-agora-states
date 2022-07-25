@@ -1,11 +1,18 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   entry: "./src/script.js",
   output: {
     path: path.resolve(__dirname, "docs"), // './dist'의 절대 경로를 리턴합니다.
     filename: "app.bundle.js",
+    clean: true,
+  },
+  devServer: {
+    contentBase: __dirname + "/docs/",
+    host: "localhost",
+    port: 3000,
   },
   module: {
     rules: [

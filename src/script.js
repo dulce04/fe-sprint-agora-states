@@ -1,20 +1,13 @@
-// index.html을 열어서 agoraStatesDiscussions 배열 요소를 확인하세요.
 let agoraStatesDiscussions = require("./data.js").agoraStatesDiscussions;
 require("./style.css");
 
-console.log(agoraStatesDiscussions);
-let data;
-const dataFromLocalStorage = localStorage.getItem("agoraStatesDiscussions");
-if (dataFromLocalStorage) {
-  data = JSON.parse(dataFromLocalStorage);
-} else {
-  data = agoraStatesDiscussions.slice();
-}
+// index.html을 열어서 agoraStatesDiscussions 배열 요소를 확인하세요.
+// let agoraStatesDiscussions = [];
 
 // convertToDiscussion은 아고라 스테이츠 데이터를 DOM으로 바꿔줍니다.
 const convertToDiscussion = (obj) => {
-  const li = document.createElement("li"); // li 요소 생성
-  li.className = "discussion__container"; // 클래스 이름 지정
+  const li = document.createElement("li");
+  li.className = "discussion__container";
 
   const avatarWrapper = document.createElement("div");
   avatarWrapper.className = "discussion__avatar--wrapper";
@@ -24,120 +17,94 @@ const convertToDiscussion = (obj) => {
   discussionAnswered.className = "discussion__answered";
 
   // TODO: 객체 하나에 담긴 정보를 DOM에 적절히 넣어주세요.
+
+  //이미지 avatarWrapper
   const avatarImg = document.createElement("img");
-  avatarImg.src = obj.avatarUrl;
-  avatarImg.alt = "avatar of " + obj.author;
+  avatarImg.className = "discussion__avatar--image";
+  avatarImg.setAttribute("src", obj.avatarUrl);
+  avatarImg.setAttribute("alt", `avatar of ${obj.id}`);
+  // console.log(avatarImg);
   avatarWrapper.append(avatarImg);
 
-  const discussionTitle = document.createElement("h2");
-  const titleAnchor = document.createElement("a");
-  titleAnchor.href = obj.url;
-  titleAnchor.textContent = obj.title;
-  discussionTitle.append(titleAnchor);
+  //콘텐츠 discussionContent
+  const contentTitle = document.createElement("h2");
+  contentTitle.className = "discussion__title";
 
-  const discussionInformation = document.createElement("div");
-  discussionInformation.className = "discussion__information";
-  discussionInformation.textContent = `${obj.author} / ${new Date(
-    obj.createdAt
-  ).toLocaleTimeString()}`;
-  discussionContent.append(discussionTitle, discussionInformation);
+  const contentLink = document.createElement("a");
+  contentLink.setAttribute("href", obj.url);
+  contentLink.textContent = obj.title;
+  contentTitle.append(contentLink);
 
-  const checked = document.createElement("p");
-  checked.textContent = obj.answer ? "☑" : "☒";
+  const contentInfo = document.createElement("div");
+  let dateLog = new Date(obj.createdAt);
+  contentInfo.className = "discussion__information";
+  contentInfo.textContent = `${obj.author} / ${dateLog.toLocaleTimeString()}`;
+  discussionContent.append(contentTitle, contentInfo);
+
+  //해결 discussionAnswered
+  let checked = document.createElement("p");
+  // answer: null 아니라면
+  if (obj.answer === null) {
+    checked.textContent = "✕";
+    checked.className = "uncheck";
+  } else {
+    checked.textContent = "✓";
+  }
+  // checked.textContent = !(obj.answer === null) ? '✓' : '✕';
   discussionAnswered.append(checked);
 
   li.append(avatarWrapper, discussionContent, discussionAnswered);
   return li;
 };
 
-// data 배열의 모든 데이터를 화면에 렌더링하는 함수입니다.
-const render = (element, from, to) => {
-  console.log(from, to);
-  if (!from && !to) {
-    from = 0;
-    to = data.length - 1;
-  }
-  // 다 지우고 배열에 있는 내용 다 보여주기
-  while (element.firstChild) {
-    element.removeChild(element.firstChild);
-  }
-  for (let i = from; i < to; i += 1) {
-    element.append(convertToDiscussion(data[i]));
+// agoraStatesDiscussions 배열의 모든 데이터를 화면에 렌더링하는 함수입니다.
+const render = (element) => {
+  for (let i = 0; i < agoraStatesDiscussions.length; i += 1) {
+    element.append(convertToDiscussion(agoraStatesDiscussions[i]));
   }
   return;
 };
 
-// 페이지네이션을 위한 변수
-let limit = 10,
-  page = 1;
+// ul 요소에 agoraStatesDiscussions 배열의 모든 데이터를 화면에 렌더링합니다.
+// fetch('http://localhost:3001/discussions')
+// .then((res)=>res.json())
+// .then((data)=>{
+//   agoraStatesDiscussions = data;
 
-// ul 요소에 data 배열의 모든 데이터를 화면에 렌더링합니다.
+//   const ul = document.querySelector("ul.discussions__container");
+//   render(ul);
+// })
+
 const ul = document.querySelector("ul.discussions__container");
-render(ul, 0, limit);
+render(ul);
 
-const getPageStartEnd = (limit, page) => {
-  const len = data.length - 1;
-  let pageStart = Number(page - 1) * Number(limit);
-  let pageEnd = Number(pageStart) + Number(limit);
-  if (page <= 0) {
-    pageStart = 0;
-  }
-  if (pageEnd >= len) {
-    pageEnd = len;
-  }
-  return { pageStart, pageEnd };
-};
+// submit 이벤트핸들러
+const signupForm = document.querySelector("form");
 
-const buttons = document.querySelector(".buttons");
-buttons.children[0].addEventListener("click", () => {
-  if (page > 1) {
-    page = page - 1;
-  }
-  const { pageStart, pageEnd } = getPageStartEnd(limit, page);
-  render(ul, pageStart, pageEnd);
-});
-
-buttons.children[1].addEventListener("click", () => {
-  if (limit * page < data.length - 1) {
-    page = page + 1;
-  }
-  const { pageStart, pageEnd } = getPageStartEnd(limit, page);
-  render(ul, pageStart, pageEnd);
-});
-
-buttons.children[2].addEventListener("click", () => {
-  localStorage.removeItem("agoraStatesDiscussions");
-  data = agoraStatesDiscussions.slice();
-  limit = 10;
-  page = 1;
-  render(ul, 0, limit);
-});
-
-// 문서의 내용을 확인해야 합니다.
-const form = document.querySelector("form.form");
-const author = form.querySelector("div.form__input--name > input");
-const title = form.querySelector("div.form__input--title > input");
-const textbox = form.querySelector("div.form__textbox > textarea");
-
-// 문서를 제출해야 합니다.
-form.addEventListener("submit", (event) => {
+signupForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const obj = {
-    id: "unique id",
-    createdAt: new Date().toISOString(),
-    title: title.value,
-    url: "https://github.com/codestates-seb/agora-states-fe/discussions",
-    author: author.value,
+  // console.log(event.target); // document.querySelector('form')
+  const inputName = event.target[0].value;
+  const inputTitle = event.target[1].value;
+  // const inputText = event.target[2].value;
+
+  let submitedDiscussion = {
+    id: undefined,
+    createdAt: Date(),
+    title: inputTitle,
+    url: "",
+    author: inputName,
     answer: null,
-    bodyHTML: textbox.value,
+    bodyHTML:
+      '<p dir="auto">--------------- 여기서부터 복사하세요 ---------------</p>\n<p dir="auto">운영 체제: 예) macOS</p>\n<p dir="auto">현재 어떤 챕터/연습문제/과제를 진행 중이고, 어떤 문제에 부딪혔나요?<br>\nPair 과제 / JavaScript Koans</p>\n<p dir="auto">npm install 명령어 입력 시 env: node: No such file or directory 라고 뜹니다</p>\n<p dir="auto">에러 발생하여 아래 명령어 실행 했는데도 불구하고 똑같은 에러가 발생했습니다<br>\nnpm cache clean --force</p>\n<p dir="auto">rm package-lock.json</p>\n<p dir="auto">rm -rf ./node_modules/</p>\n<p dir="auto">npm --verbose install</p>\n<p dir="auto">폴더 자체가 문제가 있다고 생각하여 github에서 다시 fork 후 진행했는데도 같은 에러가 발생했습니다<br>\n리눅스 기초 챕터 때 npm 설치해서 마지막 submit까지는 잘 됐는데 현재 짝수 생성기 폴더도 똑같이 npm install 시 no such file or directory가 발생합니다</p>\n<p dir="auto">에러가 출력된 곳에서, 이유라고 생각하는 부분을 열 줄 이내로 붙여넣기 해 주세요. (잘 모르겠으면 에러라고 생각하는 곳을 넣어주세요)</p>\n<div class="highlight highlight-source-js position-relative overflow-auto" data-snippet-clipboard-copy-content="minjun@dubi fe-sprint-javascript-koans-main % pwd \n/Users/minjun/Documents/fe_frontand_39/fe-sprint-javascript-koans-main\nminjun@dubi fe-sprint-javascript-koans-main % npm install \nenv: node: No such file or directory"><pre><span class="pl-s1">minjun</span>@<span class="pl-s1">dubi</span> <span class="pl-s1">fe</span><span class="pl-c1">-</span><span class="pl-s1">sprint</span><span class="pl-c1">-</span><span class="pl-s1">javascript</span><span class="pl-c1">-</span><span class="pl-s1">koans</span><span class="pl-c1">-</span><span class="pl-s1">main</span> <span class="pl-c1">%</span> <span class="pl-s1">pwd</span> \n<span class="pl-c1">/</span><span class="pl-v">Users</span><span class="pl-c1">/</span><span class="pl-s1">minjun</span><span class="pl-c1">/</span><span class="pl-v">Documents</span><span class="pl-c1">/</span><span class="pl-s1">fe_frontand_39</span><span class="pl-c1">/</span><span class="pl-s1">fe</span><span class="pl-c1">-</span><span class="pl-s1">sprint</span><span class="pl-c1">-</span><span class="pl-s1">javascript</span><span class="pl-c1">-</span><span class="pl-s1">koans</span><span class="pl-c1">-</span><span class="pl-s1">main</span>\n<span class="pl-s1">minjun</span><span class="pl-kos"></span>@<span class="pl-s1">dubi</span> <span class="pl-s1">fe</span><span class="pl-c1">-</span><span class="pl-s1">sprint</span><span class="pl-c1">-</span><span class="pl-s1">javascript</span><span class="pl-c1">-</span><span class="pl-s1">koans</span><span class="pl-c1">-</span><span class="pl-s1">main</span> <span class="pl-c1">%</span> <span class="pl-s1">npm</span> <span class="pl-s1">install</span> \nenv: node: <span class="pl-v">No</span> <span class="pl-s1">such</span> <span class="pl-s1">file</span> <span class="pl-s1">or</span> <span class="pl-s1">directory</span></pre></div>\n<p dir="auto">검색했던 링크가 있다면 첨부해 주세요.<br>\n<a href="https://mia-dahae.tistory.com/89" rel="nofollow">https://mia-dahae.tistory.com/89</a></p>\n<p dir="auto"><a href="https://stackoverflow.com/questions/38143558/npm-install-resulting-in-enoent-no-such-file-or-directory" rel="nofollow">https://stackoverflow.com/questions/38143558/npm-install-resulting-in-enoent-no-such-file-or-directory</a></p>\n<p dir="auto"><a href="https://velog.io/@hn04147/npm-install-%ED%95%A0-%EB%95%8C-tar-ENOENT-no-such-file-or-directory-lstat-%EC%97%90%EB%9F%AC%EB%82%A0-%EA%B2%BD%EC%9A%B0" rel="nofollow">https://velog.io/@hn04147/npm-install-%ED%95%A0-%EB%95%8C-tar-ENOENT-no-such-file-or-directory-lstat-%EC%97%90%EB%9F%AC%EB%82%A0-%EA%B2%BD%EC%9A%B0</a></p>\n<p dir="auto"><a href="https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&amp;blogId=chandong83&amp;logNo=221064506346" rel="nofollow">https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&amp;blogId=chandong83&amp;logNo=221064506346</a></p>\n<p dir="auto"><a href="https://webisfree.com/2021-07-15/npm-install-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-rename-no-such-file-or-directory-%ED%95%B4%EA%B2%B0%ED%95%98%EA%B0%80" rel="nofollow">https://webisfree.com/2021-07-15/npm-install-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-rename-no-such-file-or-directory-%ED%95%B4%EA%B2%B0%ED%95%98%EA%B0%80</a></p>\n<p dir="auto"><a href="https://hellowworlds.tistory.com/57" rel="nofollow">https://hellowworlds.tistory.com/57</a></p>',
     avatarUrl:
-      "https://avatars.githubusercontent.com/u/12145019?s=64&u=5c97f25ee02d87898457e23c0e61b884241838e3&v=4",
+      "https://mblogthumb-phinf.pstatic.net/MjAyMDA2MTBfMTY1/MDAxNTkxNzQ2ODcyOTI2.Yw5WjjU3IuItPtqbegrIBJr3TSDMd_OPhQ2Nw-0-0ksg.8WgVjtB0fy0RCv0XhhUOOWt90Kz_394Zzb6xPjG6I8gg.PNG.lamute/user.png?type=w800",
   };
-  data.unshift(obj);
+  agoraStatesDiscussions.unshift(submitedDiscussion);
 
-  // 로컬스토리지에 저장
-  localStorage.setItem("agoraStatesDiscussions", JSON.stringify(data));
-
-  // 렌더링
-  render(ul, 0, limit);
+  const ul = document.querySelector(".discussions__container");
+  while (ul.children.length > 1) {
+    ul.removeChild(ul.lastChild);
+  }
+  render(ul);
 });

@@ -1,5 +1,5 @@
 {
-  "name": "fe-sprint-my-agora-states-reference",
+  "name": "fe-sprint-agora-states",
   "version": "1.0.0",
   "description": "",
   "main": "data.js",
@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dulce04/fe-sprint-my-agora-states-reference.git"
+    "url": "git+https://github.com/dulce04/fe-sprint-agora-states.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dulce04/fe-sprint-my-agora-states-reference/issues"
+    "url": "https://github.com/dulce04/fe-sprint-agora-states/issues"
   },
-  "homepage": "https://github.com/dulce04/fe-sprint-my-agora-states-reference",
+  "homepage": "https://github.com/dulce04/fe-sprint-agora-states",
   "devDependencies": {
     "css-loader": "^6.7.1",
     "css-minimizer-webpack-plugin": "^4.0.0",
